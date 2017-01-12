@@ -95,7 +95,18 @@
             text-align: right;
         }
 
+        #connectedRoutes tr td {
+            text-align: center;
+        }
 
+        #connectedRoutes tr.user-highlight td {
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        #connectedRoutes td.anchor {
+            font-weight: 700;
+        }
     </style>
     <?php require $_SERVER['DOCUMENT_ROOT']."/lib/tmphpfuncs.php" ?>
     <?php
@@ -237,6 +248,7 @@ if ($routeparam != "") {
     require $_SERVER['DOCUMENT_ROOT'] . "/shields/shieldgen.php";
     echo "<div id=\"pointbox\">\n";
     echo "<span class='bigshield'>" . generate($_GET['r'], true) . "</span>";
+
     echo "<span><a href='/user/mapview.php?rte={$routeInfo['route']}'>View Associated Routes</a></span>";
 
     echo "<span>";
@@ -285,6 +297,53 @@ SQL;
     s<tr><td>Average Traveled</td><td>{$averageTraveled} ({$row['mileagePct']} %)</td></tr>
     </tbody></table>
 HTML;
+
+    echo "<table id='connectedRoutes' class=\"gratable\"><thead><tr><th>{$routeInfo['route']} in other regions:</tr></thead>";
+    $res = tmdb_query(<<<SQL
+        SELECT
+          IFNULL( (SELECT firstRoot FROM connectedRouteRoots WHERE root = '$routeparam' LIMIT 1),'$routeparam') as first,
+          region, city, root
+        FROM routes HAVING routes.root = first LIMIT 1;
+SQL
+    );
+
+    $firstRoute = $res->fetch_assoc();
+    $res->free();
+
+    $sql_command = <<<SQL
+        SELECT connectedRouteRoots.root AS root, routes.region as region, routes.city
+        FROM connectedRouteRoots
+          LEFT JOIN routes ON connectedRouteRoots.root = routes.root
+        WHERE firstRoot = '{$firstRoute['root']}';
+SQL;
+
+    if ($firstRoute['root'] == $routeInfo['root']) {
+        echo "<tr class='user-highlight'>";
+    }
+    else {
+        echo "<tr onclick=\"window.document.location = '/hb/index.php?r={$firstRoute['root']}&u=$tmuser'\">";
+    }
+
+    if ($firstRoute['city'] != "") echo "<td>{$firstRoute['region']} ({$firstRoute['city']})</td><tr>\n";
+    else echo "<td>{$firstRoute['region']}</td><tr>\n";
+
+    $res = tmdb_query($sql_command);
+    while ($row = $res->fetch_assoc())
+    {
+        if($row['root'] == $routeInfo['root']) {
+            echo "<tr class='user-highlight'>";
+        }
+        else {
+            echo "<tr onclick=\"window.document.location = '/hb/index.php?r={$row['root']}&u=$tmuser'\">";
+        }
+
+        if ($row['city'] != "") echo "<td>{$row['region']} ({$row['city']})</td><tr>\n";
+        else echo "<td>{$row['region']}</td><tr>\n";
+    }
+    $res->free();
+    echo "<tr onclick='window.document.location=\"/user/mapview.php?u={$_GET['u']}&amp;rte={$routeInfo['route']}\"'><td class='anchor'>View Associated Routes</td></tr>";
+    echo "</table>";
+
     echo "<table id='waypoints' class=\"gratable\"><thead><tr><th colspan=\"3\">Waypoints</th></tr><tr><th>Coordinates</th><th>Name</th><th title='Percent of people who have driven this route who have driven though this point.'>%</th></tr></thead><tbody>\n";
     $sql_command = <<<SQL
         SELECT pointName, latitude, longitude, driverPercent
@@ -312,17 +371,23 @@ SQL;
         if (!startsWith($row['pointName'], "+")) {
             $colorFactor = $row['driverPercent'] / 100;
             $colors = [255, 255 - round($colorFactor * 128), 255 - round($colorFactor * 128)];
-            echo "<tr onClick='javascript:LabelClick(" . $waypointnum . ",\"" . $row['pointName'] . "\"," . $row['latitude'] . "," . $row['longitude'] . ",0);'><td>(" . $row['latitude'] . "," . $row['longitude'] . ")</td><td class='link'>" . $row['pointName'] . "</td><td style='background-color: rgb({$colors[0]},{$colors[1]},{$colors[2]})'>{$row['driverPercent']}</td></tr>\n";
+            echo <<<HTML
+                <tr onClick='javascript:LabelClick($waypointnum,"{$row['pointName']}",{$row['latitude']},{$row['longitude']},0);'>
+                <td>({$row['latitude']},{$row['longitude']})</td>
+                <td class="link">{$row['pointName']}</td>
+                <td style="background-color: rgb({$colors[0]},{$colors[1]},{$colors[2]})">{$row['driverPercent']}</td>
+                </tr>
+HTML;
         }
         $waypointnum = $waypointnum + 1;
     }
     $res->free();
-    echo <<<ENDA
+    echo <<<HTML
 </table>
 </div>
   <div id="controlbox">
       <span id="controlboxroute">
-ENDA;
+HTML;
     if ($routeparam != "") {
         echo "<table><tbody><tr><td>";
         echo "<input id=\"showMarkers\" type=\"checkbox\" name=\"Show Markers\" onclick=\"showMarkersClicked()\" checked=\"false\" />&nbsp;Show Markers&nbsp;";
