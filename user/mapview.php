@@ -240,7 +240,7 @@ FROM routes AS r
 WHERE  
 SQL;
         if (array_key_exists('rte', $_GET)) {
-            $sql_command .= "(r.route like '".$_GET['rte']."' or r.route regexp '".$_GET['rte']."[a-z]')";
+            $sql_command .= "(r.route like '".$_GET['rte']."' or r.route regexp '".$_GET['rte']."')";
             $sql_command = str_replace("*", "%", $sql_command);
             if (array_key_exists('rg', $_GET) or array_key_exists('sys', $_GET)) $sql_command .= ' AND ';
         } elseif (array_key_exists('first', $_GET)) {
@@ -255,7 +255,7 @@ SQL;
             while ($row = $res->fetch_assoc()) $connClause .= "'{$row['root']}',";
             $res->free();
             
-            $connClause .= "'{$_GET['first']}')";
+            $connClause .= "'$firstRoot')";
             $sql_command .= $connClause;
             if (array_key_exists('rg', $_GET) or array_key_exists('sys', $_GET)) $sql_command .= ' AND ';
         }
@@ -275,6 +275,13 @@ SQL;
         if (!array_key_exists('first', $_GET)) $sql_command .= "ORDER BY sys.tier, r.route;";
 
         $res = tmdb_query($sql_command);
+
+        $totRoutes = 0;
+        $totMiles = 0.0;
+        $milesDriven = 0.0;
+        $routesDriven = 0;
+        $routesClinched = 0;
+
         while($row = $res->fetch_assoc()) {
             $link = "/hb?u=".$_GET['u']."&amp;r=".$row['root'];
             echo "<tr onclick=\"window.open('".$link."')\"><td class='routeName'>";
@@ -293,6 +300,12 @@ SQL;
                 <td class="clinched">
 HTML
 .tm_convert_distance($row['clinched'])."</td><td class='overall'>".tm_convert_distance($row['total'])."</td><td class='percent'>".$pct."%</td></tr>\n";
+            $totRoutes += 1;
+            $totMiles += $row['total'];
+            $milesDriven += $row['clinched'];
+
+            if ($row['clinched'] > 0.0) $routesDriven += 1;
+            if ($row['clinched'] / $row['total'] >= 0.999) $routesClinched += 1;
         }
         ?>
         </tbody>
@@ -302,9 +315,21 @@ HTML
             <tr><th colspan="2">Total Stats</th></tr>
         </thead>
         <tbody>
-            <tr><td>Miles Driven</td><td>12345 / 67890 (44.5%)</td></tr>
-            <tr><td>Routes Driven</td><td>45 / 90 (44.5%)</td></tr>
-            <tr><td>Routes Clinched</td><td>12 / 90 (12.5%)</td></tr>
+            <?php
+                function pct($amt, $total) {
+                    return round(100.0 * ($amt + 0.0) / ($total + 0.0), 2);
+                }
+
+                $milesPct = pct($milesDriven, $totMiles);
+                $drivenPct = pct($routesDriven, $totRoutes);
+                $clinchedPct = pct($routesClinched, $totRoutes);
+
+                echo <<<HTML
+            <tr><td>Miles Driven</td><td> $milesDriven / $totMiles ($milesPct %)</td></tr>
+            <tr><td>Routes Driven</td><td>$routesDriven / $totRoutes ($drivenPct %)</td></tr>
+            <tr><td>Routes Clinched</td><td>$routesClinched / $totRoutes ($clinchedPct %)</td></tr>
+HTML;
+            ?>
         </tbody>
     </table>
 </div>

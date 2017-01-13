@@ -72,7 +72,7 @@
         }
 
         if (array_key_exists("rte", $_GET)) {
-            $rteClause = " where (routes.route like '".$_GET['rte']."' or route regexp '".$_GET['rte']."[a-z]')";
+            $rteClause = " where (routes.route like '".$_GET['rte']."' or route regexp '".$_GET['rte']."')";
             $rteClause = str_replace("*", "%", $rteClause);
             if (array_key_exists('rg', $_GET)) $rteClause .= " AND ".orClauseBuilder('rg', 'region','routes');
             if (array_key_exists('sys', $_GET)) $rteClause .= " AND ".orClauseBuilder('sys', 'systemName','routes');
