@@ -94,6 +94,11 @@
 	    height: 1px;
         }
 
+        #totals {
+            width: 100%;
+            margin-top: 5px;
+        }
+
         #options {
 	    display: none;
 	    left: 0px;
@@ -238,7 +243,23 @@ SQL;
             $sql_command .= "(r.route like '".$_GET['rte']."' or r.route regexp '".$_GET['rte']."[a-z]')";
             $sql_command = str_replace("*", "%", $sql_command);
             if (array_key_exists('rg', $_GET) or array_key_exists('sys', $_GET)) $sql_command .= ' AND ';
+        } elseif (array_key_exists('first', $_GET)) {
+            $res = tmdb_query("SELECT firstRoot FROM connectedRouteRoots WHERE root = '{$_GET['first']}' LIMIT 1");
+            $row = $res->fetch_assoc();
+            if (array_key_exists('firstRoot', $row)) $firstRoot = $row['firstRoot'];
+            else $firstRoot = $_GET['first'];
+            $res->free();
+            
+            $res = tmdb_query("SELECT cr.root FROM connectedRouteRoots as cr WHERE firstRoot='$firstRoot'");
+            $connClause = "r.root IN (";
+            while ($row = $res->fetch_assoc()) $connClause .= "'{$row['root']}',";
+            $res->free();
+            
+            $connClause .= "'{$_GET['first']}')";
+            $sql_command .= $connClause;
+            if (array_key_exists('rg', $_GET) or array_key_exists('sys', $_GET)) $sql_command .= ' AND ';
         }
+
         if (array_key_exists('rg', $_GET) && array_key_exists('sys', $_GET)) {
             $sql_command .= orClauseBuilder('rg', 'region')." AND ".orClauseBuilder('sys', 'systemName');
         } elseif (array_key_exists('rg', $_GET)) {
@@ -246,11 +267,13 @@ SQL;
             ;
         } elseif (array_key_exists('sys', $_GET)) {
             $sql_command .= orClauseBuilder('sys', 'systemName');
-        } elseif (!array_key_exists('rte', $_GET)) {
+        } elseif (!array_key_exists('rte', $_GET) && !array_key_exists('first', $_GET)) {
             //Don't show. Too many routes
             $sql_command .= "r.root IS NULL";
         }
-        $sql_command .= "ORDER BY sys.tier, r.route;";
+
+        if (!array_key_exists('first', $_GET)) $sql_command .= "ORDER BY sys.tier, r.route;";
+
         $res = tmdb_query($sql_command);
         while($row = $res->fetch_assoc()) {
             $link = "/hb?u=".$_GET['u']."&amp;r=".$row['root'];
@@ -272,6 +295,16 @@ HTML
 .tm_convert_distance($row['clinched'])."</td><td class='overall'>".tm_convert_distance($row['total'])."</td><td class='percent'>".$pct."%</td></tr>\n";
         }
         ?>
+        </tbody>
+    </table>
+    <table id="totals" class="gratable">
+        <thead>
+            <tr><th colspan="2">Total Stats</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Miles Driven</td><td>12345 / 67890 (44.5%)</td></tr>
+            <tr><td>Routes Driven</td><td>45 / 90 (44.5%)</td></tr>
+            <tr><td>Routes Clinched</td><td>12 / 90 (12.5%)</td></tr>
         </tbody>
     </table>
 </div>

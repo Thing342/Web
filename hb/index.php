@@ -341,7 +341,8 @@ SQL;
         else echo "<td>{$row['region']}</td><tr>\n";
     }
     $res->free();
-    echo "<tr onclick='window.document.location=\"/user/mapview.php?u={$_GET['u']}&amp;rte={$routeInfo['route']}\"'><td class='anchor'>View Associated Routes</td></tr>";
+    echo "<tr onclick='window.document.location=\"/user/mapview.php?u={$_GET['u']}&amp;first={$firstRoute['root']}\"'><td class='anchor'>View Entire Route</td></tr>";
+    echo "<tr onclick='window.document.location=\"/user/mapview.php?u={$_GET['u']}&amp;rte={$routeInfo['route']}\"'><td class='anchor'>View Child Routes</td></tr>";
     echo "</table>";
 
     echo "<table id='waypoints' class=\"gratable\"><thead><tr><th colspan=\"3\">Waypoints</th></tr><tr><th>Coordinates</th><th>Name</th><th title='Percent of people who have driven this route who have driven though this point.'>%</th></tr></thead><tbody>\n";

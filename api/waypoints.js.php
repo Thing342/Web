@@ -7,14 +7,14 @@
  *  For a singular route:
  *  r - root of desired route, if singular
  *
- *  For many routes:
+ *  Filters for many routes:
  *  rg - code of region to search in
  *  sys - code of system to search in
  *
  */
     require $_SERVER['DOCUMENT_ROOT']."/lib/tmphpfuncs.php";
 
-    if(!array_key_exists('r', $_GET) && !array_key_exists('sys', $_GET) && !array_key_exists('rg', $_GET) && !array_key_exists('rte', $_GET))
+    if(!array_key_exists('first', $_GET) && !array_key_exists('r', $_GET) && !array_key_exists('sys', $_GET) && !array_key_exists('rg', $_GET) && !array_key_exists('rte', $_GET))
     {
         echo "Missing parameter: one of r, rg, sys, or rte MUST be set.";
         http_response_code(400);
@@ -85,6 +85,30 @@ FROM waypoints
   JOIN systems ON routes.systemname = systems.systemname AND $activeClause $rteClause
   ORDER BY root, waypoints.pointId;
 SQL;
+        } elseif (array_key_exists('first', $_GET)) {
+            $res = tmdb_query("SELECT firstRoot FROM connectedRouteRoots WHERE root = '{$_GET['first']}' LIMIT 1");
+            $row = $res->fetch_assoc();
+            if (array_key_exists('firstRoot', $row)) $firstRoot = $row['firstRoot'];
+            else $firstRoot = $_GET['first'];
+            $res->free();
+
+            $res = tmdb_query("SELECT cr.root FROM connectedRouteRoots as cr WHERE firstRoot='$firstRoot'");
+            $connClause = "WHERE routes.root IN (";
+            while ($row = $res->fetch_assoc()) $connClause .= "'{$row['root']}',";
+            $res->free();
+
+            $connClause .= "'$firstRoot')";
+            if (array_key_exists('rg', $_GET)) $connClause .= " AND ".orClauseBuilder('rg', 'region','routes');
+            if (array_key_exists('sys', $_GET)) $connClause .= " AND ".orClauseBuilder('sys', 'systemName','routes');
+            $sql_command = <<<SQL
+SELECT 
+  waypoints.pointName, waypoints.latitude, waypoints.longitude, waypoints.root, 
+  systems.tier, systems.color, systems.systemname 
+FROM waypoints 
+  JOIN routes ON routes.root = waypoints.root
+  JOIN systems ON routes.systemname = systems.systemname AND $activeClause $connClause
+  ORDER BY root, waypoints.pointId; 
+SQL;
         } elseif (($num_systems == 0) && ($num_regions == 0)) {
             // for now, put in a default to usai, do something better later
             $select_systems = " and (routes.systemName='usai')";
@@ -136,15 +160,24 @@ JS;
         if (array_key_exists("u",$_GET)) {
             //echo "// select_systems: ".$select_systems."\n";
             //echo "// where_systems: ".$where_systems."\n";
-            echo "traveler = '".$_GET['u']."';\n";
+            echo "traveler = '" . $_GET['u'] . "';\n";
             // retrieve list of segments for this region or regions
-            if(isset($rteClause)) {
+            if (isset($rteClause)) {
                 $sql_command = <<<SQL
 SELECT 
   segments.segmentId, segments.root 
 FROM segments 
   JOIN routes ON routes.root = segments.root 
   JOIN systems ON routes.systemname = systems.systemname AND $activeClause $rteClause
+ORDER BY root, segments.segmentId;
+SQL;
+            } elseif (isset($connClause)) {
+                $sql_command = <<<SQL
+SELECT 
+  segments.segmentId, segments.root 
+FROM segments 
+  JOIN routes ON routes.root = segments.root 
+  JOIN systems ON routes.systemname = systems.systemname AND $activeClause $connClause
 ORDER BY root, segments.segmentId;
 SQL;
             } else {
@@ -171,6 +204,16 @@ FROM segments
   RIGHT JOIN clinched ON segments.segmentId = clinched.segmentId 
   JOIN routes ON routes.root = segments.root 
   JOIN systems ON routes.systemname = systems.systemname AND $activeClause $rteClause AND clinched.traveler='{$_GET['u']}'
+  ORDER BY root, segments.segmentId;
+SQL;
+            } elseif(isset($connClause)) {
+                $sql_command = <<<SQL
+SELECT 
+  segments.segmentId, segments.root 
+FROM segments 
+  RIGHT JOIN clinched ON segments.segmentId = clinched.segmentId 
+  JOIN routes ON routes.root = segments.root 
+  JOIN systems ON routes.systemname = systems.systemname AND $activeClause $connClause AND clinched.traveler='{$_GET['u']}'
   ORDER BY root, segments.segmentId;
 SQL;
             } else {
