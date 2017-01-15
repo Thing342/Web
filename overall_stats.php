@@ -41,6 +41,8 @@ else $rtClause = "";
 
 
 <h1>Overall Stats</h1>
+<a name="top"></a>
+<a href="stat.php">Back to Stats Page</a>
 <table id="layout"><tbody>
 <tr><td colspan="3"><p>
 <?php
@@ -205,7 +207,7 @@ HTML;
             WHERE 1=1 $sysClause $rtClause
             GROUP BY route
             ORDER BY amt DESC
-            LIMIT 100;
+            LIMIT $num;
 SQL;
 
             $res = tmdb_query($sql_command);
@@ -234,9 +236,7 @@ HTML;
             ?>
             </tbody>
         </table></td>
-</tr>
-
-
+</tr><tr><td colspan="3"><a href="#top">Back to Top</a></td> </tr>
 </tbody></table>
 <?php require $_SERVER['DOCUMENT_ROOT'] . "/lib/tmfooter.php"; ?>
 </body>

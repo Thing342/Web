@@ -49,6 +49,7 @@
 <h1>Traveler Statistics</h1>
 <?php tm_user_select_form("\"\""); ?>
 <table style="margin: auto">
+    <a style="margin: auto;" href="overall_stats.php">Overall User Stats</a>
     <?php
     $totalMileage = round(tm_sum_column("overallMileageByRegion", "activeMileage"), 2);
     $totalPreviewMileage = round(tm_sum_column("overallMileageByRegion", "activePreviewMileage"), 2);
