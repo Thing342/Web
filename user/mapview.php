@@ -246,7 +246,7 @@ SQL;
         } elseif (array_key_exists('first', $_GET)) {
             $res = tmdb_query("SELECT firstRoot FROM connectedRouteRoots WHERE root = '{$_GET['first']}' LIMIT 1");
             $row = $res->fetch_assoc();
-            if (array_key_exists('firstRoot', $row)) $firstRoot = $row['firstRoot'];
+            if ($row != null && oarray_key_exists('firstRoot', $row)) $firstRoot = $row['firstRoot'];
             else $firstRoot = $_GET['first'];
             $res->free();
             
