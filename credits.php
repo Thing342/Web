@@ -595,9 +595,10 @@ following sources of highway information.</p>
 	  </li> 
 	  <li>New York, USA
 	    <ul>
-	    <li><a href="https://www.nysdot.gov/divisions/engineering/technical-services/highway-data-services/traffic-data">NYSDOT Traffic Data Reports</a>. Official traffic data from New York State Department of Transportation.</li>
+	    <li><a href="https://www.dot.ny.gov/divisions/engineering/technical-services/highway-data-services/traffic-data">NYSDOT Traffic Data Reports</a>. Official traffic data from New York State Department of Transportation.</li>
 	    <li><a href="https://www.nysdot.gov/divisions/operating/oom/transportation-systems/repository/2009%20tour-bk.pdf">NYSDOT Touring Routes</a>. Official route listings from New York State Department of Transportation.</li>
 	    <li><a href="http://gis3.dot.ny.gov/html5viewer/?viewer=tdv">NYS Traffic Data Viewer</a>. Interactive map and viewer for New York State Department of Transportation's highway data.</li>
+	    <li><a href="https://gis.ny.gov/gisdata/inventories/member.cfm?organizationID=539">NYS GIS Clearinghouse</a>. NYS Dept. of Transportation (DOT) Data Sets.</li>
 	    </ul>
 	  </li>
 	  <li>North Carolina, USA
@@ -707,6 +708,46 @@ following sources of highway information.</p>
 	  <li>Wyoming, USA
 	    <ul>
 <li><a href="http://corcohighways.org/">Corco Highways</a>. Hobbist site covering state highways.</li>
+<li>GIS
+	<ul>
+	<li><a href="http://www.co.albany.wy.us/map/">Albany County</a></li>
+	<li><a href="http://maps.bighorncountywy.gov/mapserver/map?">Big Horn County</a></li>
+	<li><a href="http://gis.ccgov.net/vantagepointsweb/default.aspx?config=campbellcounty">Campbell County</a></li>
+	<li><a href="http://gis.carbonwy.com/">Carbon County</a></li>
+	<li><a href="https://maps.greenwoodmap.com/converse/map?">Converse County</a></li>
+	<li><a href="http://crookgrowdev.maps.arcgis.com/apps/webappviewer/index.html?id=7238ec86a82749ff9154ee84734f5c33">Crook County</a></li>
+	<li><a href="http://maps.greenwoodmap.com/fremontwy/map?">Fremont County</a></li>
+	<li><a href="http://goshengis.maps.arcgis.com/apps/webappviewer/index.html?id=784bc955c9094dd2a0c511c6e5a754fb">Goshen County</a></li>
+	<li><a href="http://maps.hscounty.com/mapserver/map?">Hot Springs County</a></li>
+	<li><a href="https://maps.greenwoodmap.com/johnson/map?">Johnson County</a></li>
+	<li><a href="https://maps.laramiecounty.com/mapserver/map?">Laramie County</a></li>
+	<li><a href="https://maps.lcwy.org/webmaps/LinCoParcels/">Lincoln County</a></li>
+	<li><a href="https://geosmart.casperwy.gov/">Natrona County</a></li>
+	<li><a href="http://crookgrowdev.maps.arcgis.com/apps/webappviewer/index.html?id=2d541c16c4c94e2ea2a45c9225afd7bd">Niobrara County</a></li>
+	<li><a href="http://maps.greenwoodmap.com/park//map?">Park County</a></li>
+	<li><a href="http://gis.sheridancounty.com/map?">Sheridan County</a></li>
+	<li><a href="http://maps.greenwoodmap.com/sublette/mapserver/map#zcr=6.348759032379672/2746503/1094047/0&lyrs=a15,public,townlim,ownership,roads&filter=(pidn in('30112220099500'))">Sublette County</a></li>
+	<li><a href="https://maps.greenwoodmap.com/sweetwater/map?">Sweetwater County</a></li>
+	<li><a href="http://maps.greenwoodmap.com/tetonwy/mapserver/map">Teton County</a></li>
+	<li><a href="https://maps.greenwoodmap.com/uinta/mapserver/map?">Uinta County</a></li>
+	<li><a href="http://maps.greenwoodmap.com/washakie/map?">Washakie County</a></li>
+	</ul></li>
+<li>Non-GIS county info
+	<ul>
+	<li><a href="https://www.ccgov.net/DocumentCenter/Home/View/2017">Campbell County map (non-Internet Explorer)</a></li>
+	<li><a href="http://conversecounty.org/220/Road-Information">Converse County road numbers</a></li>
+	<li><a href="http://www.plattecountywyoming.com/RoadandBridge/documents/maps/PLATTE%20COUNTY%20ROADS.pdf">Platte County road map</a></li>
+	<li><a href="http://www.niobraracounty.org/_departments/_assessor/_PDF/maps/2016/NiobraraRoadMap.pdf">Niobrara County numbered roads</a></li>
+	<li>Weston County (names and numbers): <a href="http://westongov.com/_departments/_county_assessor/_pdfs/Road_Map.pdf">1</a>, <a href=http://westongov.com/_departments/_growth_development/_pdf/Cnty_Road_Maintenance.pdf>2</a></li>
+	</ul></li>
+<li>Forest Service MVUMs:
+	<ul>
+	<li>Medicine Bow-Routt NF: <a href="https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/stelprd3842002.pdf">Snowy Range</a>, <a href="https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/stelprd3842001.pdf">Sierra Madre</a>, <a href=https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/stelprd3841999.pdf>Pole Mountain</a></li>
+	<li>Bridger-Teton NF: <a href="https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/fseprd499898.pdf">1</a>, <a href=https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/fseprd500963.pdf>2</a></li>
+	<li><a href="https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/fseprd500586.pdf">Shoshone NF</a></li>
+	<li><a href="https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/fseprd497245.pdf">Bighorn NF</a></li>
+	<li>Ashley NF (Flaming Gorge NRA): <a href="https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb5432806.pdf">1</a>, <a href=https://www.fs.usda.gov/Internet/FSE_DOCUMENTS/stelprdb5432805.pdf>2</a></li>
+	</ul></li>
 	    </ul>
 	  </li>
 	<li>General
@@ -729,7 +770,8 @@ following sources of highway information.</p>
           <a href="http://roadgeek.filpus.org/">Filpus Roadgeek</a> </li>
   <li>Adam Froehlig (froggie)<br>
       <a href="http://www.ajfroggie.com/">Froggie's Place</a> </li>
-  <li>Si Hollett (si404) </li>
+  <li>Si Hollett (si404)</li>
+  <li>Michael H (michih)</li>
   <li>James Mast (rickmastfan67)<br>
         <a href="http://rickmastfan67.blogspot.com/">Rickmastfan67 Blog</a> </li>
   <li>Jeff Morrison (jeffm)<br>
