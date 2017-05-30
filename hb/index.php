@@ -163,7 +163,7 @@
         }
         ?>Travel Mapping Highway Browser (Draft)</title>
 </head>
-<?php 
+<?php
 $nobigheader = 1;
 
 if ($routeparam == "") {
@@ -179,11 +179,11 @@ if ($routeparam == "") {
     //echo "<input type=\"hidden\" name=\"u\" value=\"{$tmuser}\" />";
     echo "<input type=\"submit\" value=\"Apply Filter\" /></form>";
 
-} 
+}
 else {
     echo "<body onload=\"loadmap(); waypointsFromSQL(); updateMap();\">\n";
     require  $_SERVER['DOCUMENT_ROOT']."/lib/tmheader.php";
-      
+
 }
 ?>
 <script type="text/javascript">
