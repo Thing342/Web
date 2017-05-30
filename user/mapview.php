@@ -240,7 +240,7 @@ FROM routes AS r
 WHERE  
 SQL;
         if (array_key_exists('rte', $_GET)) {
-            $sql_command .= "(r.route like '".$_GET['rte']."' or r.route regexp '".$_GET['rte']."')";
+            $sql_command .= "(r.route like '".$_GET['rte']."' or r.route regexp '".$_GET['rte']."[A-z]')";
             $sql_command = str_replace("*", "%", $sql_command);
             if (array_key_exists('rg', $_GET) or array_key_exists('sys', $_GET)) $sql_command .= ' AND ';
         } elseif (array_key_exists('first', $_GET)) {
