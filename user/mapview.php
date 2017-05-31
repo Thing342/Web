@@ -230,13 +230,28 @@
 	</tr>
         <?php
 	// TODO: a toggle to include/exclude devel routes?
+        $connrte_order_clause = <<<SQL
+  LEFT JOIN (SELECT root, firstRoot,
+               @route:=CASE WHEN @first <> firstRoot THEN 1 ELSE @route+1 END AS rn,
+               @first:=firstRoot AS clset
+             FROM
+               (SELECT @route:= -1) s,
+               (SELECT @first:= -1) c,
+               (SELECT firstRoot, root
+                FROM connectedRouteRoots
+               ) t ) as connrte_order on connrte_order.root = r.root
+SQL;
+
         $sql_command = <<<SQL
 SELECT r.region, r.root, r.route, r.systemName, banner, city, sys.tier, 
   round(r.mileage, 2) AS total, 
-  round(COALESCE(cr.mileage, 0), 2) as clinched 
+  round(COALESCE(cr.mileage, 0), 2) as clinched,
+  CASE WHEN firstRoot is NULL then r.root ELSE firstRoot END as fr,
+  CASE WHEN rn is NULL THEN 0 ELSE rn END as rn
 FROM routes AS r 
   LEFT JOIN clinchedRoutes AS cr ON r.root = cr.route AND traveler = '{$_GET['u']}' 
   LEFT JOIN systems as sys on r.systemName = sys.systemName
+  ${connrte_order_clause}
 WHERE  
 SQL;
         if (array_key_exists('rte', $_GET)) {
@@ -272,7 +287,7 @@ SQL;
             $sql_command .= "r.root IS NULL";
         }
 
-        if (!array_key_exists('first', $_GET)) $sql_command .= "ORDER BY sys.tier, r.route;";
+        $sql_command .= "ORDER BY sys.tier, SUBSTRING_INDEX(fr, '.', -1), fr, rn, r.root;";
 
         $res = tmdb_query($sql_command);
 
