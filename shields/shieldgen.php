@@ -320,7 +320,12 @@ function generate($r, $force_reload = false)
             $svg = str_replace("***NUMBER***", $routeNum, $svg);
             break;
 
-        case 'usasf': case 'usanp': case 'eursf': case 'usakyp': case 'gbrtr':
+        case 'usasf':
+        case 'usanp':
+        case 'eursf':
+        case 'usakyp':
+        case 'gbrtr':
+        case 'cannf':
             $lines = explode(',',preg_replace('/(?!^)[A-Z]{3,}(?=[A-Z][a-z])|[A-Z][a-z]/', ',$0', $row['route']));
             $index = 0;
             foreach($lines as $line) {
@@ -372,6 +377,18 @@ function generate($r, $force_reload = false)
                 break;
             }
 
+        case 'usanes':
+            $sys_map['L'] = "LINK";
+            $sys_map['S'] = "SPUR";
+
+            $matches = [];
+            preg_match('/(?<sys>[A-Z])(?<county>[0-9]+)(?<letter>[A-Z])/', $row['route'], $matches);
+
+            $svg = str_replace("***NUMBER***", $matches['county'], $svg);
+            $svg = str_replace("***SYS***", $sys_map[$matches['sys']], $svg);
+            $svg = str_replace("***LETTER***", $matches['letter'], $svg);
+            break;
+
         case 'usanh':
             $matches = [];
             $routeNum = str_replace('NH', "", $row['route']);
@@ -383,8 +400,17 @@ function generate($r, $force_reload = false)
             }
 
         default:
-            $region = strtoupper(explode(".", $r)[0]);
-            $routeNum = str_replace($region, "", $row['route']);
+            $matches = [];
+            if (preg_match('/(?<prefix>[A-Z]+)(?<routeNum>[0-9].*)/', $row['route'], $matches) == 1) {
+                $region = $matches['prefix'];
+                $routeNum = $matches['routeNum'];
+            } else {
+                // fall back to old method
+                echo "<!-- fallback -->";
+                $region = strtoupper(explode(".", $r)[0]);
+                $routeNum = str_replace($region, "", $row['route']);
+            }
+
             if (strlen($routeNum) > 3) {
                 if (file_exists("{$dir}/template_" . $row['systemName'] . "_wide4.svg")) {
                     $svg = file_get_contents("{$dir}/template_" . $row['systemName'] . "_wide4.svg");

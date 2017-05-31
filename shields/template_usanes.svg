@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 600 600">
+    <g transform="translate(-554.4 236.8)">
+        <rect rx="37.5" ry="37.5" height="600" width="600" y="-236.8" x="554.4"/>
+        <path d="m25 25h550l-100 550h-350z" transform="translate(554.4 -236.8)" fill="#fff"/>
+    </g>
+    <text style="word-spacing:0px;letter-spacing:-5px;text-anchor:middle;text-align:center" xml:space="preserve" font-size="392.6px" line-height="125%" y="300.02026" x="295.90009" font-family="&apos;Roadgeek 2014 Series C&apos;" fill="#000000"><tspan x="293.40009" y="300.02026">***NUMBER***<tspan font-size="295.8px" fill="#000000">***LETTER***</tspan></tspan></text>
+    <text style="word-spacing:0px;letter-spacing:0px;text-anchor:middle;text-align:center" xml:space="preserve"
+          font-size="175px" line-height="125%" y="475.1488" x="299.97226"
+          font-family="&apos;Roadgeek 2014 Series C&apos;" fill="#000000">
+        <tspan style="text-anchor:middle;text-align:center" y="475.1488" x="299.97226" fill="#000000">***SYS***</tspan>
+    </text>
+</svg>
