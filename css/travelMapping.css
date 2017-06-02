@@ -15,12 +15,12 @@ table.nmptable {
     background-color: white;
 }
 
-table.nmptable td, th {
+table.nmptable td, table.nmptable th {
     border: solid black;
     border-width: 1px;
 }
 
-table.nmptable2 td, th {
+table.nmptable2 td, table.nmptable2 th {
     border-width: 0px;
 }
 
@@ -37,7 +37,7 @@ table.pthtable {
     background-color: white;
 }
 
-table.pthtable td, th {
+table.pthtable td, table.pthtable th {
     border: solid black;
     border-width: 1px;
 }
@@ -55,7 +55,7 @@ table.gratable {
     background-color: white;
 }
 
-table.gratable td, th {
+table.gratable td {
     border: solid black;
     border-width: 1px;
 }

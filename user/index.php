@@ -11,30 +11,24 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" type="text/css" href="/css/travelMapping.css" />
     <link rel="shortcut icon" type="image/png" href="/favicon.png">
-    <style type="text/css">
-        #body {
-            left: 0px;
-            top: 80px;
-            bottom: 0px;
-            overflow: auto;
-            padding: 20px;
-        }
 
-        #body h2 {
-            margin: auto;
-            text-align: center;
-            padding: 10px;
-        }
-        #logLinks {
-        	text-align: center;
-    		font-size: 14px;
+    <style type="text/css">
+        #regionsTable_wrapper, #systemsTable_wrapper, #tierTable {
+            width: 70%;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
     </style>
-    <!-- jQuery -->
-    <script type="application/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-    <!-- TableSorter -->
-    <script type="application/javascript" src="/lib/jquery.tablesorter.min.js"></script>
-<?php require $_SERVER['DOCUMENT_ROOT']."/lib/tmphpfuncs.php" ?>
+
+    <!-- Datatables -->
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.15/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rg-1.0.0/sc-1.4.2/se-1.2.2/datatables.min.css"/>
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.15/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rg-1.0.0/sc-1.4.2/se-1.2.2/datatables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/datatables.css"/>
+    <?php require $_SERVER['DOCUMENT_ROOT'] . "/lib/tmphpfuncs.php" ?>
     <title>
         <?php
         echo "Traveler Stats for " . $tmuser;
@@ -43,20 +37,39 @@
 </head>
 <body>
 <script type="text/javascript">
+    //$(document).ready(function () {
+    //        $("#regionsTable").tablesorter({
+    //            sortList: [[5,1], [4, 1]],
+    //            headers: {0: {sorter: false}, 6: {sorter: false}}
+    //        });
+    //        $("#systemsTable").tablesorter({
+    //            sortList: [[7,1], [6, 1]],
+    //            headers: {0: {sorter: false}, 9: {sorter: false}}
+    //        });
+    //        $('td').filter(function() {
+    //            return this.innerHTML.match(/^[0-9\s\.,%]+$/);
+    //        }).css('text-align','right');
+    //    }
+    //);
+
     $(document).ready(function () {
-            $("#regionsTable").tablesorter({
-                sortList: [[5,1], [4, 1]],
-                headers: {0: {sorter: false}, 6: {sorter: false}}
-            });
-            $("#systemsTable").tablesorter({
-                sortList: [[7,1], [6, 1]],
-                headers: {0: {sorter: false}, 9: {sorter: false}}
-            });
-            $('td').filter(function() {
-                return this.innerHTML.match(/^[0-9\s\.,%]+$/);
-            }).css('text-align','right');
-        }
-    );
+        $('#regionsTable').DataTable({
+            pageLength: 25,
+            order: [[2, "desc"]],
+            columnDefs: [
+                {targets: [8, 9], orderable: false},
+                {targets: '_all', orderable: true}
+            ]
+        });
+        $('#systemsTable').DataTable({
+            pageLength: 25,
+            order: [[5, "desc"]],
+            columnDefs: [
+                {targets: [8, 9], orderable: false},
+                {targets: '_all', orderable: true}
+            ]
+        });
+    });
 </script>
 <?php require  $_SERVER['DOCUMENT_ROOT']."/lib/tmheader.php"; ?>
 <div id="userbox">
@@ -83,7 +96,7 @@ echo "<h1>Traveler Stats for ".$tmuser."</h1>";
 	</div>
     <div id="overall">
         <h2>Overall Stats</h2>
-        <table class="gratable" style="width: 60%" id="tierTable">
+        <table class="dataTable no-footer display compact hover" style="width: 60%" id="tierTable">
 	    <thead>
 	    <tr><th /><th>Active Systems</th><th>Active+Preview Systems</th></tr>
 	    </thead>
@@ -92,38 +105,55 @@ echo "<h1>Traveler Stats for ".$tmuser."</h1>";
             //First fetch mileage driven, both active and active+preview
             $sql_command = <<<SQL
 SELECT
-round(sum(o.activeMileage), 2) as totalActiveMileage,
-round(sum(coalesce(co.activeMileage, 0)), 2) as clinchedActiveMileage,
-round(sum(coalesce(co.activeMileage, 0)) / sum(o.activeMileage) * 100, 2) AS activePercentage,
-round(sum(o.activePreviewMileage), 2) as totalActivePreviewMileage,
-round(sum(coalesce(co.activePreviewMileage, 0)), 2) as clinchedActivePreviewMileage,
-round(sum(coalesce(co.activePreviewMileage, 0)) / sum(o.activePreviewMileage) * 100, 2) AS activePreviewPercentage
+    round(sum(o.activeMileage), 2) as totalActiveMileage,
+    round(sum(coalesce(co.activeMileage, 0)), 2) as clinchedActiveMileage,
+    round(sum(coalesce(co.activeMileage, 0)) / sum(o.activeMileage) * 100, 2) AS activePercentage,
+    round(sum(o.activePreviewMileage), 2) as totalActivePreviewMileage,
+    round(sum(coalesce(co.activePreviewMileage, 0)), 2) as clinchedActivePreviewMileage,
+    round(sum(coalesce(co.activePreviewMileage, 0)) / sum(o.activePreviewMileage) * 100, 2) AS activePreviewPercentage
 FROM overallMileageByRegion o
-LEFT JOIN clinchedOverallMileageByRegion co ON co.region = o.region AND traveler = '$tmuser'
+  LEFT JOIN clinchedOverallMileageByRegion co ON co.region = o.region AND traveler = '$tmuser'
 SQL;
             $res = tmdb_query($sql_command);
             $row = $res->fetch_assoc();
             $res->free();
             echo "<tr class='notclickable' style=\"background-color:#EEEEFF\"><td>Distance Traveled</td>";
 	    echo "<td>" . tm_convert_distance($row['clinchedActiveMileage']);
-	    echo "/" . tm_convert_distance($row['totalActiveMileage']) . " ";
+            echo " / " . tm_convert_distance($row['totalActiveMileage']) . " ";
 	    tm_echo_units();
 	    echo " (" . $row['activePercentage'] . "%) Rank: TBD</td>";
 	    echo "<td>" . tm_convert_distance($row['clinchedActivePreviewMileage']);
-	    echo "/" . tm_convert_distance($row['totalActivePreviewMileage']) . " ";
+            echo " / " . tm_convert_distance($row['totalActivePreviewMileage']) . " ";
 	    tm_echo_units();
 	    echo " (" . $row['activePreviewPercentage'] . "%) Rank: TBD</td>";
 	    echo "</tr>";
 
 
             //Second, fetch routes driven/clinched active only
-	    $sql_command = "SELECT COUNT(cr.route) AS total FROM connectedRoutes AS cr LEFT JOIN systems ON cr.systemName = systems.systemName WHERE (systems.level = 'active');";
+            $sql_command = <<<SQL
+SELECT 
+  COUNT(cr.route) AS total 
+FROM connectedRoutes AS cr 
+  LEFT JOIN systems ON cr.systemName = systems.systemName 
+WHERE (systems.level = 'active');
+SQL;
             $res = tmdb_query($sql_command);
             $row = $res->fetch_assoc();
 	    $activeRoutes = $row['total'];
 	    $res->free();
 
-            $sql_command = "SELECT COUNT(ccr.route) AS driven, SUM(ccr.clinched) AS clinched, ROUND(COUNT(ccr.route) / ".$activeRoutes." * 100,2) AS drivenPercent, ROUND(SUM(ccr.clinched) / ".$activeRoutes." * 100,2) AS clinchedPercent FROM connectedRoutes AS cr LEFT JOIN clinchedConnectedRoutes AS ccr ON cr.firstRoot = ccr.route AND traveler = '" . $tmuser . "' LEFT JOIN routes ON ccr.route = routes.root LEFT JOIN systems ON routes.systemName = systems.systemName WHERE systems.level = 'active';";
+            $sql_command = <<<SQL
+SELECT 
+  COUNT(ccr.route) AS driven, 
+  SUM(ccr.clinched) AS clinched, 
+  ROUND(COUNT(ccr.route) / $activeRoutes * 100,2) AS drivenPercent, 
+  ROUND(SUM(ccr.clinched) / $activeRoutes * 100,2) AS clinchedPercent 
+FROM connectedRoutes AS cr 
+  LEFT JOIN clinchedConnectedRoutes AS ccr ON cr.firstRoot = ccr.route AND traveler = '$tmuser' 
+  LEFT JOIN routes ON ccr.route = routes.root 
+  LEFT JOIN systems ON routes.systemName = systems.systemName 
+WHERE systems.level = 'active';
+SQL;
             $res = tmdb_query($sql_command);
             $row = $res->fetch_assoc();
 	    $activeDriven = $row['driven'];
@@ -133,13 +163,29 @@ SQL;
 	    $res->free();
 
 	    // and active+preview
-	    $sql_command = "SELECT COUNT(cr.route) AS total FROM connectedRoutes AS cr LEFT JOIN systems ON cr.systemName = systems.systemName WHERE (systems.level = 'active' OR systems.level = 'preview');";
+            $sql_command = <<<SQL
+SELECT COUNT(cr.route) AS total 
+FROM connectedRoutes AS cr 
+LEFT JOIN systems ON cr.systemName = systems.systemName 
+WHERE (systems.level = 'active' OR systems.level = 'preview');
+SQL;
             $res = tmdb_query($sql_command);
             $row = $res->fetch_assoc();
 	    $activePreviewRoutes = $row['total'];
 	    $res->free();
 
-            $sql_command = "SELECT COUNT(ccr.route) AS driven, SUM(ccr.clinched) AS clinched, ROUND(COUNT(ccr.route) / ".$activeRoutes." * 100,2) AS drivenPercent, ROUND(SUM(ccr.clinched) / ".$activeRoutes." * 100,2) AS clinchedPercent FROM connectedRoutes AS cr LEFT JOIN clinchedConnectedRoutes AS ccr ON cr.firstRoot = ccr.route AND traveler = '" . $tmuser . "' LEFT JOIN routes ON ccr.route = routes.root LEFT JOIN systems ON routes.systemName = systems.systemName WHERE (systems.level = 'active' OR systems.level = 'preview');";
+            $sql_command = <<<SQL
+SELECT 
+  COUNT(ccr.route) AS driven, 
+  SUM(ccr.clinched) AS clinched, 
+  ROUND(COUNT(ccr.route) / $activeRoutes * 100,2) AS drivenPercent, 
+  ROUND(SUM(ccr.clinched) / $activeRoutes * 100,2) AS clinchedPercent 
+FROM connectedRoutes AS cr 
+  LEFT JOIN clinchedConnectedRoutes AS ccr ON cr.firstRoot = ccr.route AND traveler = '$tmuser'
+  LEFT JOIN routes ON ccr.route = routes.root 
+  LEFT JOIN systems ON routes.systemName = systems.systemName 
+WHERE (systems.level = 'active' OR systems.level = 'preview');
+SQL;
             $res = tmdb_query($sql_command);
             $row = $res->fetch_assoc();
 	    $activePreviewDriven = $row['driven'];
@@ -165,20 +211,23 @@ SQL;
     </div>
     <h2>Stats by Region</h2>
     <!-- h3>Legend: A=active systems only, A+P=active and preview systems</h3> -->
-    <table class="gratable tablesorter" id="regionsTable">
+    <table id="regionsTable" class="display compact hover" , width="100%">
         <thead>
-	<tr><th colspan="2" /><th colspan="3">Active Systems Only</th>
-	    <th colspan="3">Active+Preview Systems</th><th colspan="2" /></tr>
         <tr>
-            <th class="sortable">Country</th>
-            <th class="sortable">Region</th>
-            <th class="sortable">Clinched (<?php tm_echo_units(); ?>)</th>
-            <th class="sortable">Overall (<?php tm_echo_units(); ?>)</th>
-            <th class="sortable">%</th>
-            <th class="sortable">Clinched (<?php tm_echo_units(); ?>)</th>
-            <th class="sortable">Overall (<?php tm_echo_units(); ?>)</th>
-            <th class="sortable">%</th>
-            <th colspan="2">Map</th>
+            <th rowspan="2">Country</th>
+            <th rowspan="2">Region</th>
+            <th colspan="3">Active Systems</th>
+            <th colspan="3">Active + Preview Systems</th>
+            <th rowspan="2">Map</th>
+            <th rowspan="2">HB</th>
+        </tr>
+        <tr>
+            <th>Clinched (<?php tm_echo_units(); ?>)</th>
+            <th>Overall (<?php tm_echo_units(); ?>)</th>
+            <th>%</th>
+            <th>Clinched (<?php tm_echo_units(); ?>)</th>
+            <th>Overall (<?php tm_echo_units(); ?>)</th>
+            <th>%</th>
         </tr>
         </thead>
         <tbody>
@@ -214,18 +263,22 @@ SQL;
         </tbody>
     </table>
     <h2>Stats by System</h2>
-    <table class="gratable tablesorter" id="systemsTable">
+    <table id="systemsTable" class="display compact hover" , width="100%">
         <thead>
         <tr>
-            <th class="sortable">Country</th>
-            <th class="sortable">System Code</th>
-            <th class="sortable">System Name</th>
-            <th class="sortable">Tier</th>
-            <th class="sortable">Status</th>
-            <th class="sortable">Clinched (<?php tm_echo_units(); ?>)</th>
-            <th class="sortable">Total (<?php tm_echo_units(); ?>)</th>
-            <th class="sortable">% Clinched</th>
+            <th rowspan="2">Country</th>
+            <th rowspan="2">System Code</th>
+            <th rowspan="2">System Name</th>
+            <th rowspan="2">Tier</th>
+            <th rowspan="2">Status</th>
+            <th rowspan="2">Clinched (<?php tm_echo_units(); ?>)</th>
+            <th rowspan="2">Total (<?php tm_echo_units(); ?>)</th>
+            <th rowspan="2">% Clinched</th>
             <th colspan="2">Map</th>
+        </tr>
+        <tr>
+            <th>Map</th>
+            <th>HB</th>
         </tr>
         </thead>
         <tbody>
@@ -256,12 +309,13 @@ SQL;
         $res = tmdb_query($sql_command);
         while ($row = $res->fetch_assoc()) {
 	    if ($row['clinchedMileage'] == 0) continue;
-            echo "<tr onclick=\"window.document.location='/user/system.php?u=" . $tmuser . "&amp;sys=" . $row['systemName'] . "'\" class=\"status-" . $row['level'] . "\">";
+            $jsopen = "window.document.location = '/user/system.php?u={$tmuser}&amp;sys={$row['systemName']}'";
+            echo "<tr onclick=\"{$jsopen}\">";
             echo "<td>" . $row['countryCode'] . "</td>";
             echo "<td>" . $row['systemName'] . "</td>";
             echo "<td>" . $row['fullName'] . "</td>";
-            echo "<td>Tier " . $row['tier'] . "</td>";
-            echo "<td>" . $row['level'] . "</td>";
+            echo "<td class='status-{$row['level']}'>Tier " . $row['tier'] . "</td>";
+            echo "<td class='status-{$row['level']}'>" . $row['level'] . "</td>";
             echo "<td>" . tm_convert_distance($row['clinchedMileage']) . "</td>";
             echo "<td>" . tm_convert_distance($row['totalMileage']) . "</td>";
             echo "<td>" . $row['percentage'] . "%</td>";
