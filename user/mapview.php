@@ -21,12 +21,16 @@
         #controlbox {
             position: absolute;
             top: 30px;
-            height: 30px;
+            height: 20px;
             right: 20px;
             overflow: auto;
             padding: 5px;
             font-size: 20px;
 	    width: 25%;
+        }
+
+        #routesTable {
+            background-color: white;
         }
 
         #routesTable .routeName {
@@ -47,22 +51,6 @@
 
         #routesTable .percent {
             min-width: 57px;
-        }
-
-        #routesTable tr.float th {
-            position: relative;!important;
-            top: -1px;!important;
-            left: -1px;!important;
-            border-left-width: 1px;
-            border-right-width: 1px;
-        }
-
-        #routesTable tr.float th:first-child {
-            border-left-width: 2px;
-        }
-
-        #routesTable tr.float th:last-child {
-            border-right-width: 2px;
         }
 
         #map {
@@ -87,20 +75,6 @@
 	    opacity: .95;  /* also forces stacking order */
         }
 
-        #routes {
-	    display: none;
-	    left: 0px;
-            width: 1px;
-	    height: 1px;
-        }
-
-        #options {
-	    display: none;
-	    left: 0px;
-            width: 1px;
-	    height: 1px;
-        }
-
         #showHideMenu {
             position: absolute;
             right: 10px;
@@ -111,10 +85,12 @@
         src="http://maps.googleapis.com/maps/api/js?key=<?php echo $gmaps_api_key ?>&sensor=false"
         type="text/javascript"></script>
 
-    <!-- jQuery -->
-    <script type="application/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-    <!-- TableSorter -->
-    <script type="application/javascript" src="/lib/jquery.tablesorter.js"></script>
+    <!--Datatables-->
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.15/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rg-1.0.0/sc-1.4.2/se-1.2.2/datatables.min.css"/>
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.15/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rg-1.0.0/sc-1.4.2/se-1.2.2/datatables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/datatables.css"/>
 
     <script src="../lib/tmjsfuncs.js" type="text/javascript"></script>
     <title>Travel Mapping: Draft Map Overlay Viewer</title>
@@ -127,45 +103,31 @@
         var menu = document.getElementById("showHideMenu");
         var index = menu.selectedIndex;
         var value = menu.options[index].value;
-        routes = document.getElementById("routes");
-        options = document.getElementById("options");
-        selected = document.getElementById("selected");
+        routes = $('#routes');
+        options = $('#options');
+        selected = $('#selected');
         // show only table (or no table) based on value
         if (value == "routetable") {
-            selected.innerHTML = routes.innerHTML;
+            routes.show();
+            options.hide();
         }
         else if (value == "options") {
-            selected.innerHTML = options.innerHTML;
+            routes.hide();
+            options.show();
         }
         else {
-            selected.innerHTML = "";
+            routes.hide();
+            options.hide();
         }
-    }
-
-    function initFloatingHeaders($table) {
-        var $col = $table.find('tr.float');
-        var $th = $col.find('th');
-        var tag = "<tr style='height: 22px'></tr>";
-        $(tag).insertAfter($col);
-        $th.each(function (index) {
-            var $row = $table.find('tr td:nth-child(' + (index + 1) + ')');
-            if ($row.outerWidth() > $(this).width()) {
-                $(this).width($row.width());
-            } else {
-                $row.width($(this).width());
-            }
-        });
     }
 
     $(document).ready(function () {
-            $routesTable = $('#routesTable');
-            $routesTable.tablesorter({
-                sortList: [[1, 0]]
+        $('#routesTable').DataTable({
+            paging: false,
+            columnDefs: [
+                {targets: '_all', orderable: true}
+            ]
             });
-            $('td').filter(function() {
-                return this.innerHTML.match(/^[0-9\s\.,%]+$/);
-            }).css('text-align','right');
-            initFloatingHeaders($routesTable);
         }
     );
 </script>
@@ -174,106 +136,113 @@
 
 <div id="map">
 </div>
-<div id="selected"></div>
-<div id="options">
-    <form id="optionsForm" action="mapview.php">
-    <table id="optionsTable" class="gratable">
-    <thead>
-    <tr><th>Select Map Options</th></tr>
-    </thead>
-    <tbody>
-    <tr><td>
-    <input id="showMarkers" type="checkbox" name="Show Markers" onclick="showMarkersClicked()" />&nbsp;Show Markers
-    </td></tr>
+<div id="selected">
+    <div id="options" hidden>
+        <form id="optionsForm" action="mapview.php">
+            <table id="optionsTable" class="gratable">
+                <thead>
+                <tr>
+                    <th>Select Map Options</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <input id="showMarkers" type="checkbox" name="Show Markers" onclick="showMarkersClicked()"/>&nbsp;Show
+                        Markers
+                    </td>
+                </tr>
 
-    <tr><td>User: 
-<?php tm_user_select(); ?>
-    </td></tr>
-    
-    <tr><td>Region(s): <br />
-<?php tm_region_select(TRUE); ?>
-    </td></tr>
-    
-    <tr><td>System(s): <br />
-<?php tm_system_select(TRUE); ?>
-    </td></tr>
+                <tr>
+                    <td>User:
+                        <?php tm_user_select(); ?>
+                    </td>
+                </tr>
 
-    <tr><td>
-    <input type="submit" value="Apply Changes" />	
-    </td></tr>
-    </tbody>
-    </table>
-    </form>
-</div>
-<div id="routes">
-    <table id="routesTable" class="gratable tablesorter">
-        <thead>
-            <tr class="float" ><th class="sortable routeName">Route</th><th class="sortable systemName">System</th>
-                <th class="sortable clinched">Clinched (<?php tm_echo_units(); ?>)</th><th class="sortable overall">Overall (<?php tm_echo_units(); ?>)</th><th class="sortable percent">%</th></tr>
-        </thead>
-        <tbody>
-        <!-- TEMP FIX: 1 dummy table lines to account for the fact that the
-	styling places the table header row above on top of the first
-	two rows of data in the table -->
-        <tr><td class='routeName'>DUMMY</td>
-            <td class='link systemName'>1. syst</td>
-            <td class="clinched">0000</td><td class='overall'>0000</td><td class='percent'>0.00%</td>
-	</tr>
-        <tr><td class='routeName'>DUMMY</td>
-            <td class='link systemName'>2. syst</td>
-            <td class="clinched">0000</td><td class='overall'>0000</td><td class='percent'>0.00%</td>
-	</tr>
-        <?php
-	// TODO: a toggle to include/exclude devel routes?
-        $sql_command = <<<SQL
-SELECT r.region, r.root, r.route, r.systemName, banner, city, sys.tier, 
-  round(r.mileage, 2) AS total, 
-  round(COALESCE(cr.mileage, 0), 2) as clinched 
-FROM routes AS r 
-  LEFT JOIN clinchedRoutes AS cr ON r.root = cr.route AND traveler = '{$_GET['u']}' 
-  LEFT JOIN systems as sys on r.systemName = sys.systemName
-WHERE  
+                <tr>
+                    <td>Region(s): <br/>
+                        <?php tm_region_select(TRUE); ?>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>System(s): <br/>
+                        <?php tm_system_select(TRUE); ?>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <input type="submit" value="Apply Changes"/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div hih>
+    <div id="routes">
+        <table id="routesTable" class="display compact hover">
+            <thead>
+            <tr>
+                <th class="sortable routeName">Route</th>
+                <th class="sortable systemName">System</th>
+                <th class="sortable clinched">Clinched (<?php tm_echo_units(); ?>)</th>
+                <th class="sortable overall">Overall (<?php tm_echo_units(); ?>)</th>
+                <th class="sortable percent">%</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
+            // TODO: a toggle to include/exclude devel routes?
+            $sql_command = <<<SQL
+    SELECT r.region, r.root, r.route, r.systemName, banner, city, sys.tier, 
+      round(r.mileage, 2) AS total, 
+      round(COALESCE(cr.mileage, 0), 2) as clinched 
+    FROM routes AS r 
+      LEFT JOIN clinchedRoutes AS cr ON r.root = cr.route AND traveler = '{$_GET['u']}' 
+      LEFT JOIN systems as sys on r.systemName = sys.systemName
+    WHERE  
 SQL;
-        if (array_key_exists('rte', $_GET)) {
-            $sql_command .= "(r.route like '".$_GET['rte']."' or r.route regexp '".$_GET['rte']."[a-z]')";
-            $sql_command = str_replace("*", "%", $sql_command);
-            if (array_key_exists('rg', $_GET) or array_key_exists('sys', $_GET)) $sql_command .= ' AND ';
-        }
-        if (array_key_exists('rg', $_GET) && array_key_exists('sys', $_GET)) {
-            $sql_command .= orClauseBuilder('rg', 'region')." AND ".orClauseBuilder('sys', 'systemName');
-        } elseif (array_key_exists('rg', $_GET)) {
-            $sql_command .= orClauseBuilder('rg', 'region')
-            ;
-        } elseif (array_key_exists('sys', $_GET)) {
-            $sql_command .= orClauseBuilder('sys', 'systemName');
-        } elseif (!array_key_exists('rte', $_GET)) {
-            //Don't show. Too many routes
-            $sql_command .= "r.root IS NULL";
-        }
-        $sql_command .= "ORDER BY sys.tier, r.route;";
-        $res = tmdb_query($sql_command);
-        while($row = $res->fetch_assoc()) {
-            $link = "/hb?u=".$_GET['u']."&amp;r=".$row['root'];
-            echo "<tr onclick=\"window.open('".$link."')\"><td class='routeName'>";
-            //REGION ROUTE BANNER (CITY)
-            echo $row['region'] . " " . $row['route'];
-            if (strlen($row['banner']) > 0) {
-                echo " " . $row['banner'];
+            if (array_key_exists('rte', $_GET)) {
+                $sql_command .= "(r.route like '" . $_GET['rte'] . "' or r.route regexp '" . $_GET['rte'] . "[a-z]')";
+                $sql_command = str_replace("*", "%", $sql_command);
+                if (array_key_exists('rg', $_GET) or array_key_exists('sys', $_GET)) $sql_command .= ' AND ';
             }
-            if (strlen($row['city']) > 0) {
-                echo " (" . $row['city'] . ")";
+            if (array_key_exists('rg', $_GET) && array_key_exists('sys', $_GET)) {
+                $sql_command .= orClauseBuilder('rg', 'region') . " AND " . orClauseBuilder('sys', 'systemName');
+            } elseif (array_key_exists('rg', $_GET)) {
+                $sql_command .= orClauseBuilder('rg', 'region');
+            } elseif (array_key_exists('sys', $_GET)) {
+                $sql_command .= orClauseBuilder('sys', 'systemName');
+            } elseif (!array_key_exists('rte', $_GET)) {
+                //Don't show. Too many routes
+                $sql_command .= "r.root IS NULL";
             }
-	    $pct = sprintf("%0.2f",( $row['clinched'] / $row['total'] * 100) );
-            echo <<<HTML
-                </td>
-                <td class='link systemName'>{$row['tier']}. <a href='/user/system.php?u={$_GET['u']}&amp;sys={$row['systemName']}'>{$row['systemName']}</a></td>
-                <td class="clinched">
+            $sql_command .= "ORDER BY sys.tier, r.route;";
+            $res = tmdb_query($sql_command);
+            while ($row = $res->fetch_assoc()) {
+                $link = "/hb?u=" . $_GET['u'] . "&amp;r=" . $row['root'];
+                echo "<tr onclick=\"window.open('" . $link . "')\"><td class='routeName'>";
+                //REGION ROUTE BANNER (CITY)
+                echo $row['region'] . " " . $row['route'];
+                if (strlen($row['banner']) > 0) {
+                    echo " " . $row['banner'];
+                }
+                if (strlen($row['city']) > 0) {
+                    echo " (" . $row['city'] . ")";
+                }
+                $pct = sprintf("%0.2f", ($row['clinched'] / $row['total'] * 100));
+                echo <<<HTML
+                    </td>
+                    <td class='link systemName'>{$row['tier']}. <a href='/user/system.php?u={$_GET['u']}&amp;sys={$row['systemName']}'>{$row['systemName']}</a></td>
+                    <td class="clinched">
 HTML
-.tm_convert_distance($row['clinched'])."</td><td class='overall'>".tm_convert_distance($row['total'])."</td><td class='percent'>".$pct."%</td></tr>\n";
-        }
-        ?>
-        </tbody>
-    </table>
+                    . tm_convert_distance($row['clinched']) . "</td><td class='overall'>" . tm_convert_distance($row['total']) . "</td><td class='percent'>" . $pct . "%</td></tr>\n";
+            }
+            ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 <div id="controlbox">
     <select id="showHideMenu" onchange="toggleTable();">
