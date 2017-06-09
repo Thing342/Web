@@ -14,11 +14,12 @@
     <link rel="stylesheet" type="text/css" href="/css/travelMapping.css" />
     <link rel="shortcut icon" type="image/png" href="/favicon.png">
     <style type="text/css">
-        table.gratable {
+        .dataTables_wrapper {
             max-width: 50%;
             width: 700px;
             margin-bottom: 15px;
             margin-top: 15px;
+            margin: auto;
         }
 
         #mapholder {
@@ -88,10 +89,12 @@
         src="http://maps.googleapis.com/maps/api/js?key=<?php echo $gmaps_api_key ?>&sensor=false"
         type="text/javascript"></script>
     <script src="../lib/tmjsfuncs.js" type="text/javascript"></script>
-    <!-- jQuery -->
-    <script src="http://code.jquery.com/jquery-1.11.0.min.js" type="text/javascript"></script>
-    <!-- TableSorter -->
-    <script src="/lib/jquery.tablesorter.min.js" type="text/javascript"></script>
+    <!--Datatables-->
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.15/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rg-1.0.0/sc-1.4.2/se-1.2.2/datatables.min.css"/>
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.15/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rg-1.0.0/sc-1.4.2/se-1.2.2/datatables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/datatables.css"/>
 </head>
 <body 
 <?php
@@ -103,18 +106,31 @@ if (( $tmuser != "null") || ( $system != "" )) {
 
 <script type="text/javascript">
     $(document).ready(function () {
-            $("#regionsTable").tablesorter({
-                sortList: [[4, 1]]
-            });
-            $("#routeTable").tablesorter({
-                sortList: [[0, 0]],
-                headers: {0: {sorter: false}, 1: {sorter: false}, 3: {sorter: false},}
-            });
-            $('td').filter(function() {
-                return this.innerHTML.match(/^[0-9\s\.,%]+$/);
-            }).css('text-align','right');
-        }
-    );
+        $('#regionsTable').DataTable({
+            paging: false,
+            searching: false,
+            order: [[2, "desc"]],
+            columnDefs: [
+                {targets: [1], orderable: false},
+                {targets: '_all', orderable: true}
+            ]
+        });
+        $('#routeTable').DataTable({
+            pageLength: 50,
+            order: [[1, "asc"]],
+            columnDefs: [
+                {targets: [0], orderable: false},
+                {targets: '_all', orderable: true}
+            ]
+        });
+        $('#overallTable').DataTable({
+            paging: false,
+            searching: false,
+            columnDefs: [
+                {targets: '_all', orderable: false}
+            ]
+        });
+    });
 </script>
 <?php require  $_SERVER['DOCUMENT_ROOT']."/lib/tmheader.php"; ?>
 <div id="header">
@@ -159,8 +175,13 @@ if (( $tmuser == "null") || ( $system == "" )) {
     <div id="mapholder">
         <div id="controlboxinfo"></div>
         <div id="map"></div>
-        <table class="gratable tablesorter" id="overallTable">
-            <thead><tr><th colspan="2">System Statistics for <?php echo "$systemName"; ?></th></tr></thead>
+        <table class="compact display hover" id="overallTable">
+            <thead>
+            <tr>
+                <th>System Statistics for <?php echo "$systemName"; ?></th>
+                <th><?php echo $tmuser ?></th>
+            </tr>
+            </thead>
             <tbody>
             <?php
 	    // get overall stats either for entire system or within
@@ -240,8 +261,12 @@ SQL;
         </table>
         <?php
         if($region == "") {
-            echo <<<HTML
-                <table class="gratable tablesorter" id="regionsTable">
+            $res = tmdb_query("SELECT COUNT(DISTINCT region) as num FROM routes WHERE systemName = '$system'");
+            $num_regions = $res->fetch_assoc();
+            $res->free();
+            if ($num_regions['num'] > 1) {
+                echo <<<HTML
+                <table class="display compact hover" id="regionsTable">
                     <caption>TIP: Click on a column head to sort. Hold SHIFT in order to sort by multiple columns.</caption>
                     <thead>
                     <tr><th colspan="4">Statistics by Region</th></tr>
@@ -254,7 +279,7 @@ SQL;
                     </thead>
                     <tbody>
 HTML;
-            $sql_command = <<<SQL
+                $sql_command = <<<SQL
             SELECT
               miByRegion.region,
               ROUND(IFNULL(clinchedByRegion.mileage, 0), 2) as clinchedMileage,
@@ -266,11 +291,11 @@ HTML;
             WHERE miByRegion.systemName = '{$system}'
             ORDER BY percentage DESC ;
 SQL;
-            $res = tmdb_query($sql_command);
-            while ($row = $res->fetch_assoc()) {
-		$clinched = tm_convert_distance($row['clinchedMileage']);
-		$total = tm_convert_distance($row['totalMileage']);
-                echo <<<HTML
+                $res = tmdb_query($sql_command);
+                while ($row = $res->fetch_assoc()) {
+                    $clinched = tm_convert_distance($row['clinchedMileage']);
+                    $total = tm_convert_distance($row['totalMileage']);
+                    echo <<<HTML
                 <tr onclick='window.open("/user/system.php?u={$tmuser}&sys={$system}&rg={$row['region']}")'>
                     <td>{$row['region']}</td>
                     <td>{$clinched}</td>
@@ -278,25 +303,26 @@ SQL;
                     <td>{$row['percentage']}%</td>
                 </tr>
 HTML;
+                }
+                $res->free();
+                echo "</tbody></table>";
             }
-            $res->free();
-            echo "</tbody></table>";
         }
         ?>
-        <table class="gratable tablesorter" id="routeTable">
+        <table class="display compact hover" id="routeTable">
             <thead>
             <tr>
                 <th colspan="8">Statistics by Route</th>
             </tr>
             <tr>
-                <th class="nonsortable">Route</th>
-                <th class="sortable">#</th>
-                <th class="nonsortable">Banner</th>
-                <th class="nonsortable">Abbrev</th>
-                <th class="nonsortable">Section</th>
-                <th class="sortable">Clinched (<?php tm_echo_units(); ?>)</th>
-                <th class="sortable">Total (<?php tm_echo_units(); ?>)</th>
-                <th class="sortable">%</th>
+                <th>Route</th>
+                <th>#</th>
+                <th>Banner</th>
+                <th>Abbrev</th>
+                <th>Section</th>
+                <th>Clinched (<?php tm_echo_units(); ?>)</th>
+                <th>Total (<?php tm_echo_units(); ?>)</th>
+                <th>%</th>
             </tr>
             </thead>
             <tbody>
