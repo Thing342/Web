@@ -123,6 +123,10 @@ table.gratable tr.float th {
     border-width: 2px;
 }
 
+table.dataTable.display tbody tr:hover {
+    cursor: pointer;
+}
+
 .shield svg {
     width: 45px;
     height: 36px;

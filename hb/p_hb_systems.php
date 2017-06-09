@@ -7,8 +7,33 @@
  */
 //We have no filters at all, so display list of systems as a landing page.
 echo <<<HTML
-    <table class="gratable tablesorter" id="systemsTable">
-        <caption>TIP: Click on a column header to sort. Hold SHIFT to sort by multiple columns.</caption>
+    <script type="text/javascript">
+    $(document).ready(function () {
+            $('#systemsTable').DataTable({
+                pageLength: 50,
+                order: [[3, "asc"], [0, "asc"], [1, "asc"]],
+                columnDefs: [
+                    {targets: [0, 1, 3, 4], orderable: true},
+                    {targets: '_all', orderable: false}
+                ],
+                stateSave: true
+            });
+        });
+    </script>
+    <style type="text/css">
+    #systems_container {
+        width: 50%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    #systemsTable > tbody > tr > td.sysname {
+        font-size: 11px;
+        font-weight: 800;
+    }
+</style>
+    <div id="systems_container">
+    <table class="display compact hover" id="systemsTable">
         <thead>
             <tr><th colspan="5">List of Systems</th></tr>
             <tr><th class="sortable">Country</th><th class="sortable">System</th><th class="sortable">Code</th><th class="sortable">Status</th><th class="sortable">Level</th></tr>
@@ -27,8 +52,8 @@ while ($row = $res->fetch_assoc()) {
         echo "<td>{$row['name']}</td>";
     }
 
-    echo "<td>{$row['fullName']}</td><td>{$row['systemName']}</td><td>{$row['level']}</td><td>Tier {$row['tier']}</td></tr>\n";
+    echo "<td class='sysname'>{$row['fullName']}</td><td>{$row['systemName']}</td><td>{$row['level']}</td><td>Tier {$row['tier']}</td></tr>\n";
 }
 
-echo "</tbody></table>";
+echo "</tbody></table></div>";
 ?>

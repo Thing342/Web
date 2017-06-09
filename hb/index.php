@@ -97,6 +97,7 @@
 
 
     </style>
+
     <?php require $_SERVER['DOCUMENT_ROOT']."/lib/tmphpfuncs.php" ?>
     <?php
     // check for region and/or system parameters
@@ -133,19 +134,15 @@
         type="text/javascript"></script>
     <!-- jQuery -->
     <script src="http://code.jquery.com/jquery-1.11.0.min.js" type="text/javascript"></script>
-    <!-- TableSorter -->
-    <script src="/lib/jquery.tablesorter.min.js" type="text/javascript"></script>
+    <!--Datatables-->
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.15/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rg-1.0.0/sc-1.4.2/se-1.2.2/datatables.min.css"/>
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/v/dt/jq-2.2.4/dt-1.10.15/fc-3.2.2/fh-3.1.2/kt-2.2.1/r-2.1.1/rg-1.0.0/sc-1.4.2/se-1.2.2/datatables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/datatables.css"/>
 
     <script src="../lib/tmjsfuncs.js" type="text/javascript"></script>
-    <script type="application/javascript">
-        $(document).ready(function () {
-                $("#routes").tablesorter({
-                    sortList: [[0, 0]],
-                    headers: {0: {sorter: false}, 4: {sorter: false}, 5: {sorter: false}}
-                });
-            }
-        );
-    </script>
+
     <title><?php
         if ($routeparam != "") {
             $sql_command = "SELECT * FROM routes WHERE root = '" . $_GET['r'] . "'";
@@ -186,52 +183,7 @@ else {
 
 }
 ?>
-<script type="text/javascript">
-    function initFloatingHeaders($table) {
-        var $col = $table.find('tr.float');
-        var $th = $col.find('th');
-        var tag = "<tr style='height: 22px'></tr>";
-        $(tag).insertAfter($col);
-        $th.each(function (index) {
-            var $row = $table.find('tr td:nth-child(' + (index + 1) + ')');
-            if ($row.outerWidth() > $(this).width()) {
-                $(this).width($row.width());
-            } else {
-                $row.width($(this).width());
-            }
-            var pos =  $row.position().left - $table.offset().left - 2;
-            //console.log($table.offset().left);
-            $(this).css({left: pos})
-        });
-    }
-
-    $(document).ready(function () {
-            <?php
-                if ($routeparam != "") {
-
-                } elseif (($region != "") or ($system != "")) {
-                    echo <<<JS
-                    routes = $("#routes");
-                    routes.tablesorter({
-                        sortList: [[0, 0], [6, 0]],
-                        headers: {0: {sorter: false}}
-                    });
-                    initFloatingHeaders(routes);
-JS;
-                } else {
-                    echo <<<JS
-                    systems = $('#systemsTable');
-                    systems.tablesorter({
-                        sortList: [[0, 0], [4, 0], [3, 0]],
-                        headers: {0: {sorter: false}}
-                    });
-JS;
-                }
-            ?>
-        }
-    );
-</script>
-
+<div id="container" style="width: 100%">
 <?php
 if ($routeparam != "") {
     require 'p_hb_map.php';
@@ -242,6 +194,7 @@ if ($routeparam != "") {
 }
 $tmdb->close();
 ?>
+</div>
 </body>
 <script type="application/javascript" src="../api/waypoints.js.php?<?php echo "r=$routeparam&u=$tmuser";?>"></script>
 </html>

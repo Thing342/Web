@@ -6,14 +6,41 @@
  * Time: 4:46 PM
  */
 require $_SERVER['DOCUMENT_ROOT'] . "/shields/shieldgen.php";
+
+echo <<<HTML
+<script type="text/javascript">
+$(document).ready(function () {
+        $('#waypoints').DataTable({
+            paging: false,
+            order: [[0, "asc"]],
+            columnDefs: [
+                {targets: 2, searchable: true},
+                {targets: [0, 3], orderable: true},
+                {targets: '_all', orderable: false, searchable: false}
+            ],
+            stateSave: true
+        });
+        
+        $('#routeInfo').DataTable({
+            paging: false,
+            columnDefs: [
+                {targets: '_all', orderable: false}
+            ]
+        });
+    });
+</script>
+HTML;
+
 echo "<div id=\"pointbox\">\n";
 echo "<span class='bigshield'>" . generate($_GET['r'], true) . "</span>";
 echo "<span><a href='/user/mapview.php?rte={$routeInfo['route']}'>View Associated Routes</a></span>";
 
-echo "<span>";
-$sql_command = "SELECT region, route, banner, city FROM routes WHERE root = '" . $routeparam . "';";
+$sql_command = "SELECT region, UPPER(systemName) as system, route, banner, city FROM routes WHERE root = '$routeparam';";
 $res = tmdb_query($sql_command);
 $row = $res->fetch_assoc();
+echo "<span>";
+echo "<a href='/hb?sys={$row['system']}'>{$row['system']}</a>&nbsp;>&nbsp;";
+echo "<a href='/hb?rg={$row['region']}'>{$row['region']}</a>&nbsp;>&nbsp;";
 echo $row['region'] . " " . $row['route'];
 if (strlen($row['banner']) > 0) {
     echo " " . $row['banner'];
@@ -21,10 +48,10 @@ if (strlen($row['banner']) > 0) {
 if (strlen($row['city']) > 0) {
     echo " (" . $row['city'] . ")";
 }
-$res->free();
 echo "</span>";
+$res->free();
 
-echo "<table id='routeInfo' class=\"gratable\"><thead><tr><th colspan='2'>Route Stats</th></tr></thead><tbody>";
+echo "<table id='routeInfo' class=\"cell-border display compact hover\"><thead><tr><th colspan='2'>Route Stats</th></tr></thead><tbody>";
 $sql_command = <<<SQL
       SELECT
           COUNT(*) as numDrivers,
@@ -56,7 +83,19 @@ echo <<<HTML
     s<tr><td>Average Traveled</td><td>{$averageTraveled} ({$row['mileagePct']} %)</td></tr>
     </tbody></table>
 HTML;
-echo "<table id='waypoints' class=\"gratable\"><thead><tr><th colspan=\"3\">Waypoints</th></tr><tr><th>Coordinates</th><th>Name</th><th title='Percent of people who have driven this route who have driven though this point.'>%</th></tr></thead><tbody>\n";
+echo <<<HTML
+<table id='waypoints' class='display compact hover'>
+<thead>
+    <tr><th colspan="4">Waypoints</th></tr>
+    <tr>
+        <th>#</th>
+        <th>Coordinates</th>
+        <th>Name</th>
+        <th title='Percent of people who have driven this route who have driven though this point.'>%</th>
+    </tr>
+</thead>
+<tbody>
+HTML;
 $sql_command = <<<SQL
         SELECT pointName, latitude, longitude, driverPercent
         FROM waypoints
@@ -83,7 +122,8 @@ while ($row = $res->fetch_assoc()) {
     if (!startsWith($row['pointName'], "+")) {
         $colorFactor = $row['driverPercent'] / 100;
         $colors = [255, 255 - round($colorFactor * 128), 255 - round($colorFactor * 128)];
-        echo "<tr onClick='javascript:LabelClick(" . $waypointnum . ",\"" . $row['pointName'] . "\"," . $row['latitude'] . "," . $row['longitude'] . ",0);'><td>(" . $row['latitude'] . "," . $row['longitude'] . ")</td><td class='link'>" . $row['pointName'] . "</td><td style='background-color: rgb({$colors[0]},{$colors[1]},{$colors[2]})'>{$row['driverPercent']}</td></tr>\n";
+        $onclick = "javascript:LabelClick(" . $waypointnum . ",\"" . $row['pointName'] . "\"," . $row['latitude'] . "," . $row['longitude'] . ",0);";
+        echo "<tr onClick='${onclick}'><td>${waypointnum}</td></td><td>(" . $row['latitude'] . "," . $row['longitude'] . ")</td><td class='link'>" . $row['pointName'] . "</td><td style='background-color: rgb({$colors[0]},{$colors[1]},{$colors[2]})'>{$row['driverPercent']}</td></tr>\n";
     }
     $waypointnum = $waypointnum + 1;
 }

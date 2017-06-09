@@ -116,10 +116,12 @@ table.dataTable.stripe tbody tr.odd.selected, table.dataTable.display tbody tr.o
 
 table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover {
     background-color: whitesmoke;
+    cursor: pointer;
 }
 
 table.dataTable.hover tbody tr:hover.selected, table.dataTable.display tbody tr:hover.selected {
     background-color: #a9b7d1;
+    cursor: pointer;
 }
 
 table.dataTable.order-column tbody tr > .sorting_1,
